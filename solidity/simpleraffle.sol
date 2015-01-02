@@ -79,12 +79,11 @@ contract FundRaiserRaffle {
 	// Buy raffle tickets to value of msg.value from raffle with id $(raffleId).
 	// Any msg.value modulo just goes into the raffleFund without getting a ticket
 	// Future feature : Allow ticketPrice to change during lifetime of raffle.
-	function buyRaffleTickets(uint256 raffleId) returns (uint firstTicket, uint lastTicket) {
+	function buyRaffleTickets(uint256 raffleId) returns (uint lastTicket) {
 		var raffle = rafflesList[raffleId];
 		if (raffle.ticketPrice == 0) // check for non-existing raffle
 			return;
 		if( block.number < raffle.deadline) {
-			firstTicket = raffle.numTickets;
 			raffle.raffleFund += msg.value; 
 			for (var i=0; i <= (msg.value/raffle.ticketPrice); i++){ //ToDo double check solidity division symantics, want integer division here.
 				var ticket = raffle.tickets[raffle.numTickets]; // nb zero indexed array vs numTickets starting at 1
@@ -107,13 +106,13 @@ contract FundRaiserRaffle {
 	function _drawRaffleWinners(uint raffleId, uint fee) returns (bool success) {
 		var raffle = rafflesList[raffleId];
 		if (raffle.deadline < block.number) {
-		/*
-			winningNumbers = TenRandomNumberStore.send(value=fee, // split the admin fee with TenRandomNumberStore
-												gas=5000, 
-												data=[raffle.deadline, raffle.numPrizes]);
-											);
-		*/
-
+			/*
+			 *		winningNumbers = TenRandomNumberStore.send(value=fee, // split the admin fee with TenRandomNumberStore
+			 *											gas=5000, 
+			 *											data=[raffle.deadline, raffle.numPrizes]);
+			 *										);
+			 */
+			
 			Winning win = raffle.winning;
 			win.number[0] = 123;
 			win.number[1] = 234;
@@ -147,49 +146,49 @@ contract FundRaiserRaffle {
 		var raffle = rafflesList[raffleId];
 		if (raffle.deadline < block.number) { 
 			if(raffle.raffleFund >= raffle.goal){		
-				if( _drawRaffleWinners(raffleId, (raffle.raffleFund * 0.01)) && 
+				if( _drawRaffleWinners(raffleId, (raffle.raffleFund/100*1)) && 
 					raffle.winning.number[1] > 0) { // Make sure there were random numbers returned. [0] can be zero but [1] can't ever
-					
-					uint benefit    = raffle.raffleFund * 0.50;
-					uint firstPrize = raffle.raffleFund * 0.25;
-					uint secondPrize= raffle.raffleFund * 0.10;
-					uint thirdPrize = raffle.raffleFund * 0.01;
-					
-					raffle.beneficary.send(benefit);
-					raffle.raffleFund -= benefit;
-					//1 x 1st
-					raffle.tickets[raffle.winning.number[1] % raffle.numTickets].ticketHolder.send(firstPrize);
-					raffle.raffleFund -= firstPrize;
-					//2 x 2nd
-					raffle.tickets[raffle.winning.number[2] % raffle.numTickets].ticketHolder.send(secondPrize);
-					raffle.raffleFund -= secondPrize;
-					raffle.tickets[raffle.winning.number[3] % raffle.numTickets].ticketHolder.send(secondPrize);
-					raffle.raffleFund -= secondPrize;
-					// 3 x 3rd
-					raffle.tickets[raffle.winning.number[4] % raffle.numTickets].ticketHolder.send(thirdPrize);
-					raffle.raffleFund -= thirdPrize;
-					raffle.tickets[raffle.winning.number[5] % raffle.numTickets].ticketHolder.send(thirdPrize);
-					raffle.raffleFund -= thirdPrize;
-					raffle.tickets[raffle.winning.number[6] % raffle.numTickets].ticketHolder.send(thirdPrize);
-					raffle.raffleFund -= thirdPrize;
-					
-					// Leftovers (1%) to contract owner
-					address(this).send(raffle.raffleFund); //ToDo API syntax
-					raffle.raffleFund = 0;
-					
-					// Cleanup
-					for (var idx = 0; idx < raffle.numTickets; idx ++){
-						var ticket = raffle.tickets[idx]; // nb zero indexed array vs numTickets starting at 1
-						delete raffle.tickets[idx];
+						
+						uint benefit    = raffle.raffleFund /100*50;
+						uint firstPrize = raffle.raffleFund /100*25;
+						uint secondPrize= raffle.raffleFund /100*10;
+						uint thirdPrize = raffle.raffleFund /100*1;
+						
+						raffle.beneficary.send(benefit);
+						raffle.raffleFund -= benefit;
+						//1 x 1st
+						raffle.tickets[raffle.winning.number[1] % raffle.numTickets].ticketHolder.send(firstPrize);
+						raffle.raffleFund -= firstPrize;
+						//2 x 2nd
+						raffle.tickets[raffle.winning.number[2] % raffle.numTickets].ticketHolder.send(secondPrize);
+						raffle.raffleFund -= secondPrize;
+						raffle.tickets[raffle.winning.number[3] % raffle.numTickets].ticketHolder.send(secondPrize);
+						raffle.raffleFund -= secondPrize;
+						// 3 x 3rd
+						raffle.tickets[raffle.winning.number[4] % raffle.numTickets].ticketHolder.send(thirdPrize);
+						raffle.raffleFund -= thirdPrize;
+						raffle.tickets[raffle.winning.number[5] % raffle.numTickets].ticketHolder.send(thirdPrize);
+						raffle.raffleFund -= thirdPrize;
+						raffle.tickets[raffle.winning.number[6] % raffle.numTickets].ticketHolder.send(thirdPrize);
+						raffle.raffleFund -= thirdPrize;
+						
+						// Leftovers (1%) to contract owner
+						address(this).send(raffle.raffleFund); //ToDo API syntax
+						raffle.raffleFund = 0;
+						
+						// Cleanup
+						for (var idx = 0; idx < raffle.numTickets; idx ++){
+							var ticket = raffle.tickets[idx]; // nb zero indexed array vs numTickets starting at 1
+							delete raffle.tickets[idx];
+						}
+						delete raffle;
+						paidOut = true;
+					} else {
+						// random number service couldn't provide numbers for blockId=deadline
+						_refundTickets(raffleId);
+						delete raffle;
+						paidOut = true;
 					}
-					delete raffle;
-					paidOut = true;
-				} else {
-					// random number service couldn't provide numbers for blockId=deadline
-					_refundTickets(raffleId);
-					delete raffle;
-					paidOut = true;
-				}
 			} else {
 				// Goal not reached, refund tickets
 				_refundTickets(raffleId);
