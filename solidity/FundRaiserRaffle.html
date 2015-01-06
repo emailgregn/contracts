@@ -1,0 +1,47 @@
+<html>
+<head>
+  <title>Fund Raiser Raffle</title>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
+  <script src="FundRaiserRaffle.js"></script>
+</head>
+
+<body>
+  <div class="header">
+    <h1 class="text-muted">Fund Raiser Raffle</h1>
+  </div>
+
+  <div class="jumbotron">
+    <h3>Owner: <strong id="owner"></strong></h3>
+    <h3>Next Raffle Id: <strong id="nextRaffleId"></strong></h3>
+    <br>
+
+    <div>
+      <div class="form-group">
+        <input id="beneficary"  class="form-control" type="text" placeholder="Beneficary address"></input><br>
+		<input id="goal"        class="form-control" type="text" placeholder="Fundraising goal"></input><br>
+		<input id="deadline"    class="form-control" type="text" placeholder="Deadline"></input><br>
+		<input id="ticketPrice" class="form-control" type="text" placeholder="Ticket price"></input><br>
+		<input id="description" class="form-control" type="text" placeholder="Description"></input><br>
+      </div>
+      <button class="btn btn-default" onclick="newRaffle();">New Raffle</button>
+    </div>
+
+
+    <div>
+      <div class="form-group">
+        <input id="raffleId" class="form-control" type="text" placeholder="Raffle ID" value="0"></input><br>
+        <input id="amount" class="form-control" type="text" placeholder="Amount" value="11"></input><br>
+      </div>
+      <button class="btn btn-default" onclick="buyRaffleTickets();">Buy tickets</button>
+      <button class="btn" onclick="drawRaffle();">Draw</button>
+    </div>
+  </div>
+
+  </div>
+
+
+
+</body>
+
+</html>
