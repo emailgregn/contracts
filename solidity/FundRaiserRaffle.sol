@@ -1,16 +1,7 @@
 contract FundRaiserRaffle {
-	// A simple raffle Contract. 
-	// Unlimited tickets per raffle.
-	// If less than goal is raised by deadline, all tickets are refunded.
-	// As many tickets as possible are bought for each contribution.
-	// Because of modulo, same ticket could possibly win more than 1 prize.
-	// Fund distribution:
-	//   Raffle beneficary = 50%
-	//   First prize * 1   = 25%
-	//   Second prize* 2   = 10%
-	//   Third prize * 3   = 1%
-	//   Admin fee   * 1   = 2%
-	
+	/// @title Fund Raiser Raffle
+	/// @author emailgregn
+
 	struct RaffleData {
 		address beneficary;
 		string32 description;
@@ -35,14 +26,24 @@ contract FundRaiserRaffle {
 	
 	address owner;
 	uint nextRaffleId;
-	mapping(uint256 => RaffleData) rafflesList;
+	mapping(uint => RaffleData) rafflesList;
 	
-	// Constructor
+	/// @dev A simple raffle Contract. 
+	/// Unlimited tickets per raffle.
+	/// If less than goal is raised by deadline, all tickets are refunded.
+	/// As many tickets as possible are bought for each contribution.
+	/// Because of modulo, same ticket could possibly win more than 1 prize.
+	/// Fund distribution:
+	///   Raffle beneficary = 50%
+	///   First prize * 1   = 25%
+	///   Second prize* 2   = 10%
+	///   Third prize * 3   = 1%
+	///   Admin fee   * 1   = 2%
 	function FundRaiserRaffle(){
 		owner = msg.sender;
 	}
 	
-	// refund everyone & shutdown
+	/// @dev refund everyone & shutdown
 	function shutdown() {
 		if (msg.sender == owner) {
 			for(var raffleId = 0; raffleId < nextRaffleId; raffleId++){
@@ -51,18 +52,24 @@ contract FundRaiserRaffle {
 		}
 	}
 	
-	// Crash & burn
+	/// @dev Crash & burn
 	function kill() {
 		if (msg.sender == owner) {
 			suicide(owner);
 		}
 	}
 	
-	// Start a new raffle.
-	// TicketPrice must be > 0
-	// Goal must be >= 100 otherwise prizes would drop into floats
-	// Deadline must be a future blockId
-	function newRaffle(address beneficary, uint256 goal, uint256 deadline, uint256 ticketPrice, string32 description) returns (uint id) {
+	/// @notice Start a raffle to raise at least `(goal)` wei and send it to an account accessible only by `beneficary.address()`.
+	/// @dev Start a new raffle.
+	/// TicketPrice must be > 0
+	/// Goal must be >= 100 otherwise prizes would drop into floats
+	/// Deadline must be a future blockId
+	/// @param beneficary Address that the raised funds will be sent to
+	/// @param goal       Minimum amount raised for prizes to be awarded
+	/// @param deadline   Block number when ticket sales close
+	/// @param ticketPrice Price of a single ticket in wei
+	/// @param description Purpose of the raffle, perhaps something about the beneficary
+	function newRaffle(address beneficary, uint goal, uint deadline, uint ticketPrice, string32 description) returns (uint id) {
 		if (ticketPrice > 0 && goal >= 100 && deadline > block.number ) {
 			var raffle = rafflesList[nextRaffleId];
 			id = nextRaffleId; // returned arg
@@ -76,10 +83,12 @@ contract FundRaiserRaffle {
 		}
 	}
 	
-	// Buy raffle tickets to value of msg.value from raffle with id $(raffleId).
-	// Any msg.value modulo just goes into the raffleFund without getting a ticket
-	// Future feature : Allow ticketPrice to change during lifetime of raffle.
-	function buyRaffleTickets(uint256 raffleId) returns (uint lastTicket) {
+	/// @notice Buy raffle tickets to value of `(msg.value)` from raffle `(description)`.
+	/// @dev Buy raffle tickets to value of msg.value from raffle with id $(raffleId).
+	/// Any msg.value modulo just goes into the raffleFund without getting a ticket
+	/// Future feature : Allow ticketPrice to change during lifetime of raffle.
+	/// @param RaffleId
+	function buyRaffleTickets(uint raffleId) returns (uint lastTicket) {
 		var raffle = rafflesList[raffleId];
 		if (raffle.ticketPrice == 0) // check for non-existing raffle
 			return;
@@ -101,17 +110,19 @@ contract FundRaiserRaffle {
 		}
 	}
 	
-	// Returns a list of unique winning ticketNumbers
-	// ToDo: ask a specialist random number contract to help
-	function _drawRaffleWinners(uint raffleId, uint fee) returns (bool success) {
+	/// @dev Returns a list of unique winning ticketNumbers
+	/// ToDo: ask a specialist random number contract to help
+	/// @param raffleId
+	/// @param fee How much in wei to pay for the random numbers
+	private: function _drawRaffleWinners(uint raffleId, uint fee) returns (bool success) {
 		var raffle = rafflesList[raffleId];
 		if (raffle.deadline < block.number) {
 			/*
-			 *		winningNumbers = TenRandomNumberStore.send(value=fee, // split the admin fee with TenRandomNumberStore
-			 *											gas=5000, 
-			 *											data=[raffle.deadline, raffle.numPrizes]);
-			 *										);
-			 */
+			*		winningNumbers = TenRandomNumberStore.send(value=fee, // split the admin fee with TenRandomNumberStore
+			*											gas=5000, 
+			*											data=[raffle.deadline, raffle.numPrizes]);
+			*										);
+			*/
 			
 			Winning win = raffle.winning;
 			win.number[0] = 123;
@@ -126,7 +137,9 @@ contract FundRaiserRaffle {
 		}
 	}
 	
-	function _refundTickets(uint raffleId) {
+	/// @dev send the ticket purchase price back to the buyer
+	/// @param raffleId
+	private: function _refundTickets(uint raffleId) {
 		var raffle = rafflesList[raffleId];
 		for (var idx = 0; idx < raffle.numTickets; idx ++){
 			var ticket = raffle.tickets[idx]; // nb zero indexed array vs numTickets starting at 1
@@ -140,8 +153,9 @@ contract FundRaiserRaffle {
 		raffle.beneficary.send(0); // Send them a "it's over" message
 	}
 	
-	// Because of modulo, same ticket could win twice.
-	function drawRaffle(uint256 raffleId) returns(bool paidOut) {
+	/// @dev Because of modulo, same ticket could win twice.
+	/// @param raffleId 
+	function drawRaffle(uint raffleId) returns(bool paidOut) {
 		paidOut = false;
 		var raffle = rafflesList[raffleId];
 		if (raffle.deadline < block.number) { 
@@ -200,4 +214,12 @@ contract FundRaiserRaffle {
 			paidOut = false;
 		}
 	}
+/* 
+ * Todo: figure out return values and finish these
+	function listRaffles(){
+	}
+
+	function getRaffleDetails(uint raffleId){
+	}
+*/
 }
