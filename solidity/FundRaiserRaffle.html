@@ -13,7 +13,8 @@
 
   <div class="jumbotron">
     <h3>Owner: <strong id="owner"></strong></h3>
-    <h3>Next Raffle Id: <strong id="nextRaffleId"></strong></h3>
+    <h3>Last Ticket: <strong id="lastTicketId"></strong></h3>
+    <h3>PaidOut: <strong id="paidOut"></strong></h3>
     <br>
 
     <div>
@@ -30,7 +31,8 @@
 
     <div>
       <div class="form-group">
-        <input id="raffleId" class="form-control" type="text" placeholder="Raffle ID" value="0"></input><br>
+		<label>Raffle Id</label>
+        <select id="raffleId" class="form-control"></select><br>
         <input id="amount" class="form-control" type="text" placeholder="Amount" value="11"></input><br>
       </div>
       <button class="btn btn-default" onclick="buyRaffleTickets();">Buy tickets</button>

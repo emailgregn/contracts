@@ -64,15 +64,15 @@ contract FundRaiserRaffle {
 	/// TicketPrice must be > 0
 	/// Goal must be >= 100 otherwise prizes would drop into floats
 	/// Deadline must be a future blockId
-	/// @param beneficary Address that the raised funds will be sent to
-	/// @param goal       Minimum amount raised for prizes to be awarded
-	/// @param deadline   Block number when ticket sales close
+	/// @param beneficary  Address that the raised funds will be sent to
+	/// @param goal        Minimum amount ( >= 100) raised for prizes to be awarded
+	/// @param deadline    Block number when ticket sales close
 	/// @param ticketPrice Price of a single ticket in wei
 	/// @param description Purpose of the raffle, perhaps something about the beneficary
-	function newRaffle(address beneficary, uint goal, uint deadline, uint ticketPrice, string32 description) returns (uint id) {
+	function newRaffle(address beneficary, uint goal, uint deadline, uint ticketPrice, string32 description) returns (uint raffleId) {
 		if (ticketPrice > 0 && goal >= 100 && deadline > block.number ) {
 			var raffle = rafflesList[nextRaffleId];
-			id = nextRaffleId; // returned arg
+			raffleId = nextRaffleId; // returned arg
 			raffle.beneficary = beneficary;
 			raffle.description = description;
 			raffle.goal = goal;

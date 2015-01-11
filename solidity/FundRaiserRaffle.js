@@ -1,5 +1,41 @@
 //change this contract address to the one you have created!
-var contractAddress = '0xe3669d9bb3b06c001e4727bb93c1bb604a28ff71';
+var contractAddress = '0x83dc4b84fcccfd7c14a7d7bfdaac2b14742f5b7e';
+
+var contractInterface = [
+	{ "name": "shutdown",
+		"inputs" :[],
+		"outputs":[]
+	},
+	{ "name": "kill",
+		"inputs" :[],
+		"outputs":[]
+	},
+	{ "name": "newRaffle",
+		"inputs" :[
+		{"name": "beneficary", 	 "type":"address"}
+		,{"name": "goal", 		 "type":"uint"}
+		,{"name": "deadline", 	 "type":"uint"}
+		,{"name": "ticketPrice", "type":"uint"}
+		,{"name": "description", "type":"uint"}],
+		"outputs":[
+		{"name": "raffleId", 	 "type":"string32"}]
+	},
+	{ "name": "buyRaffleTickets",
+		"inputs" :[
+		{"name": "raffleId", 	 "type":"uint"}],
+		"outputs":[
+		{"name": "lastTicket", 	 "type":"uint"}]
+	},
+	{ "name": "drawRaffle",
+		"inputs" :[
+		{"name": "raffleId", 	 "type":"uint"}],
+		"outputs":[
+		{"name": "paidOut", 	 "type":"bool"}
+		]
+	}
+];
+
+var raffleContract = web3.contract(contractAddress, contractInterface);
 
 function newRaffle() {
 	
@@ -9,24 +45,31 @@ function newRaffle() {
 	var ticketPrice = document.querySelector('#ticketPrice').value;
 	var description = document.querySelector('#description').value;
 	
-	var data = [beneficary, goal, deadline, ticketPrice, description];
-	// Which contract function???
-	web3.eth.transact({to: contractAddress, data: data, gas: 5000});
+	//What about gas?
+	raffleContract.newRaffle(beneficary, goal, deadline, ticketPrice, description).call().then(function(res) {
+		var option = document.createElement('option');
+		option.value = res[0];
+		option.text  = res[0];
+		document.getElementById('raffleId').add(option, null);
+	});
 }
 
 function buyRaffleTickets(){
 	var raffleId = document.querySelector('#raffleId').value;
-	var amount = document.querySelector('#amount').value;
-	var data = [raffleId, amount];
-	// Which contract function???
-	web3.eth.transact({value: amount, to: contractAddress, data: data, gas: 5000});
+	var amount   = document.querySelector('#amount').value;
+
+	//What about gas?
+	raffleContract.buyRaffleTickets(raffleId, amount).call().then(function(res) {
+		document.getElementById('lastTicketIdId').innerText = res[0];
+	});
 }
 
 function drawRaffle(){
 	var raffleId = document.querySelector('#raffleId').value;
-	var data = [raffleId];
-	// Which contract function???
-	web3.eth.transact({to: contractAddress, data: data, gas: 5000});
+	//What about gas?
+	raffleContract.buyRaffleTickets(raffleId).call().then(function(res) {
+		document.getElementById('paidOut').innerText = res[0];
+	});
 }
 
 web3.eth.watch().changed(function(){
@@ -46,11 +89,6 @@ web3.eth.watch({altered: {at: web3.eth.nextRaffleId, id: contractAddress}}).chan
 	document.getElementById('nextRaffleId').innerText = web3.toDecimal(web3.eth.stateAt(contractAddress, web3.eth.nextRaffleId));
 });
 */
-/*
- var receiverAddress = '0x' + document.querySelector('#receiverAddress').value;*
- var amount = document.querySelector('#amount').value;
- 
- */
 
 
 web3.eth.watch({altered: web3.eth.coinbase}).changed(function(){
