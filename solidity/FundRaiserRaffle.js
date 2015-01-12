@@ -18,7 +18,7 @@ var contractInterface = [
 		,{"name": "ticketPrice", "type":"uint"}
 		,{"name": "description", "type":"uint"}],
 		"outputs":[
-		{"name": "raffleId", 	 "type":"string32"}]
+		{"name": "raffleId", 	 "type":"uint"}]
 	},
 	{ "name": "buyRaffleTickets",
 		"inputs" :[
