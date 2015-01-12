@@ -1,5 +1,5 @@
 //change this contract address to the one you have created!
-var contractAddress = '0x83dc4b84fcccfd7c14a7d7bfdaac2b14742f5b7e';
+var contractAddress = '0x69e3ee60d96fcdecb24fb8258a65d671458e2916';
 
 var contractInterface = [
 	{ "name": "shutdown",
@@ -12,7 +12,7 @@ var contractInterface = [
 	},
 	{ "name": "newRaffle",
 		"inputs" :[
-		{"name": "beneficary", 	 "type":"address"}
+		 {"name": "beneficary", 	 "type":"address"}
 		,{"name": "goal", 		 "type":"uint"}
 		,{"name": "deadline", 	 "type":"uint"}
 		,{"name": "ticketPrice", "type":"uint"}
@@ -80,17 +80,6 @@ web3.eth.watch().changed(function(){
 	})
 });
 
-/*
-w eb3.eth.watch({altered: {at: web3.eth.accounts[0], id: contractAddress}}).changed(function() {
-	document.getElementById('owner').innerText = web3.toDecimal(web3.eth.stateAt(contractAddress, web3.eth.owner));
-});
-
-web3.eth.watch({altered: {at: web3.eth.nextRaffleId, id: contractAddress}}).changed(function() {
-	document.getElementById('nextRaffleId').innerText = web3.toDecimal(web3.eth.stateAt(contractAddress, web3.eth.nextRaffleId));
-});
-*/
-
-
 web3.eth.watch({altered: web3.eth.coinbase}).changed(function(){
 	web3.eth.coinbase.then(function(result) {
 		document.getElementById('coinbase').innerText = result;
@@ -100,10 +89,14 @@ web3.eth.watch({altered: web3.eth.coinbase}).changed(function(){
 	});
 });
 
-web3.eth.watch().changed(function(){
-	web3.eth.block(web3.eth.number).then(function(result){
-		document.getElementById('latestBlock').innerText = web3.eth.number._result;
-		document.getElementById('latestBlockHash').innerText = result.hash;
-		document.getElementById('latestBlockTimestamp').innerText = Date(result.timestamp);
-	})
-});
+/*
+ * w eb3.eth.watch({altered: {at: web3.eth.accounts[0], id: contractAddress}}).changed(function() {
+ *	document.getElementById('owner').innerText = web3.toDecimal(web3.eth.stateAt(contractAddress, web3.eth.owner));
+ * });
+ * 
+ * web3.eth.watch({altered: {at: web3.eth.nextRaffleId, id: contractAddress}}).changed(function() {
+ *	document.getElementById('nextRaffleId').innerText = web3.toDecimal(web3.eth.stateAt(contractAddress, web3.eth.nextRaffleId));
+ * });
+ */
+
+

@@ -1,18 +1,20 @@
 //change this contract address to the one you have created!
-var contractAddress = '0xcc490ca2cfa3127f265cade2bb23ebc8869cd726';
+var contractAddress = '0xdc319d5a0e227f037975f5ac5e6a29ed64ddd208';
 
 var contractInterface = [
 	{ "name": "mint",
 		"inputs" :[
 			{"name": "owner", 	 "type":"address"}
 			,{"name": "amount", 	 "type":"uint"}],
-		"outputs":[]
+		"outputs":[
+			{"name": "balance", "type":"uint"}]
 	},
 	{ "name": "send",
 		"inputs" :[
 			{"name": "receiver", 	 "type":"address"}
 			,{"name": "amount", 	 "type":"uint"}],
-		"outputs":[]
+		"outputs":[
+			{"name": "balance", "type":"uint"}]
 	},
 	{ "name": "queryBalance",
 		"inputs" :[
@@ -29,6 +31,7 @@ function mint(){
 	var amount = document.querySelector('#amount').value;	
 
 	ccyContract.mint(owner, amount).call().then(function(res) {
+		var r = res[0];
 		debugger;
 	});
 }
@@ -37,6 +40,7 @@ function send(){
 	var amount = document.querySelector('#amount').value;	
 	
 	ccyContract.send(receiver, amount).call().then(function(res) {
+		var r = res[0];
 		debugger;
 	});
 }
